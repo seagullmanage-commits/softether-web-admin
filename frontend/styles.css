@@ -5,3 +5,5 @@ select{font:inherit;color:inherit;background:#101820;border:1px solid #40505d;bo
 .stats{grid-template-columns:repeat(4,minmax(0,1fr))}.stat{min-width:0}.stat strong{font-size:clamp(20px,2.3vw,32px);overflow-wrap:anywhere}@media(max-width:1050px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 .user-status{display:inline-block;min-width:68px;text-align:center;white-space:nowrap;padding:4px 9px;border:1px solid #41515f;border-radius:999px;font-size:12px;font-weight:500;line-height:1.4;color:#b8c7d2;background:#26323e}.user-status.is-online{color:#a4cbb5;background:#243b32;border-color:#3d6050}.user-status.is-offline{color:#d4aaaa;background:#3c2b30;border-color:#65474e}
+
+button.user-status.is-online:hover{background:#304d40;border-color:#658e77;color:#bddbc9}#ip-dialog{width:min(460px,calc(100vw - 36px));overflow-wrap:anywhere}#ip-list{padding-left:22px;line-height:1.9;font-variant-numeric:tabular-nums}

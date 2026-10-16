@@ -10,11 +10,17 @@ export class Users {
  async list(hub:string){
   try{await this.hub(hub);const r=await this.rpc.call('EnumUser',{HubName_str:hub});if(!Array.isArray(r.UserList)||r.UserList.length>10000)throw Error();
    let connected:Set<string>|null=null;
+   const sessionUsers=new Map<string,string>();let userIps:Map<string,Set<string>>|null=null;
    try{const sessions=await this.rpc.call('EnumSession',{HubName_str:hub});
     if(!Array.isArray(sessions.SessionList)||sessions.SessionList.length>10000)throw Error();
-    connected=new Set(sessions.SessionList.map(v=>{const row=object(v);if(typeof row.Username_str!=='string')throw Error();return row.Username_str.toLowerCase();}));
+    connected=new Set(sessions.SessionList.map(v=>{const row=object(v);if(typeof row.Username_str!=='string')throw Error();const user=row.Username_str.toLowerCase();if(typeof row.Name_str==='string')sessionUsers.set(row.Name_str,user);return user;}));
    }catch{connected=null;}
-   return {statusAvailable:connected!==null,users:r.UserList.map(v=>{const u=object(v);return {name:string(u,'Name_str'),online:connected===null?null:connected.has(string(u,'Name_str').toLowerCase()),realName:string(u,'Realname_utf'),group:string(u,'GroupName_str'),note:string(u,'Note_utf'),authType:typeof u.AuthType_u32==='number'?u.AuthType_u32:null,denied:typeof u.DenyAccess_bool==='boolean'?u.DenyAccess_bool:null,lastLogin:string(u,'LastLoginTime_dt')||null,logins:typeof u.NumLogin_u32==='number'?u.NumLogin_u32:null};})};
+   if(connected!==null){try{
+    const result=await this.rpc.call('EnumIPTable',{HubName_str:hub});
+    if(!Array.isArray(result.IpTable)||result.IpTable.length>10000)throw Error();
+    userIps=new Map();for(const value of result.IpTable){const row=object(value);if(typeof row.SessionName_str!=='string'||typeof row.IpAddress_ip!=='string')throw Error();const user=sessionUsers.get(row.SessionName_str);if(user&&row.IpAddress_ip){const ips=userIps.get(user)??new Set<string>();ips.add(row.IpAddress_ip);userIps.set(user,ips);}}
+   }catch{userIps=null;}}
+   return {statusAvailable:connected!==null,users:r.UserList.map(v=>{const u=object(v);return {name:string(u,'Name_str'),online:connected===null?null:connected.has(string(u,'Name_str').toLowerCase()),vpnIps:userIps===null?null:[...(userIps.get(string(u,'Name_str').toLowerCase())??[])],realName:string(u,'Realname_utf'),group:string(u,'GroupName_str'),note:string(u,'Note_utf'),authType:typeof u.AuthType_u32==='number'?u.AuthType_u32:null,denied:typeof u.DenyAccess_bool==='boolean'?u.DenyAccess_bool:null,lastLogin:string(u,'LastLoginTime_dt')||null,logins:typeof u.NumLogin_u32==='number'?u.NumLogin_u32:null};})};
   }catch(e){if(e instanceof UserError)throw e;throw new UserError(502,'Could not load users. Retry after checking server connectivity.');}
  }
  private async mutate(action:string,hub:string,name:string,actor:string,run:()=>Promise<void>){

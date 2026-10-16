@@ -81,3 +81,8 @@ The IP assignments section shows SecureNAT DHCP leases with assigned address, de
 ## User connection status — 0.3.2
 
 The Users table includes Online/Offline status based on active sessions in the selected hub, matched by username without case sensitivity. Multiple sessions still show a single Online status. Failed or malformed session enumeration shows Unavailable, never Offline. The selected user list refreshes with the dashboard every 30 seconds while visible, and when Refresh is clicked.
+
+
+## Online user IP popup — 0.3.4
+
+Click an Online badge to fetch the selected user's current VPN addresses. The dialog lists unique learned addresses joined to that user's active sessions in the selected hub. Multiple devices are combined; stale IP-table entries without a matching active session are excluded. Offline, unavailable and not-yet-learned results are shown explicitly. The dialog supports keyboard activation, Escape and a Close button.

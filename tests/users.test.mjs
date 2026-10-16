@@ -30,3 +30,7 @@ test('online status uses sessions from the selected hub and matches case-insensi
 test('missing or failed session data shows unavailable, never offline',async()=>{
  for(const response of [null,{}, {SessionList:[{}]}]){const u=new Users({call:async m=>{if(m==='EnumHub')return{HubList:[{HubName_str:'HUB'}]};if(m==='EnumUser')return{UserList:[{Name_str:'Alice'}]};if(response===null)throw Error('private detail');return response;}},{write:()=>{}});const result=await u.list('HUB');assert.equal(result.statusAvailable,false);assert.equal(result.users[0].online,null);}
 });
+
+test('VPN IPs join active sessions only, combine devices and deduplicate addresses',async()=>{
+ const u=new Users({call:async(m,p)=>{if(m==='EnumHub')return{HubList:[{HubName_str:'HUB'}]};assert.equal(p.HubName_str,'HUB');if(m==='EnumUser')return{UserList:[{Name_str:'Alice'},{Name_str:'Bob'}]};if(m==='EnumSession')return{SessionList:[{Name_str:'S1',Username_str:'alice'},{Name_str:'S2',Username_str:'ALICE'}]};return{IpTable:[{SessionName_str:'S1',IpAddress_ip:'192.0.2.1'},{SessionName_str:'S2',IpAddress_ip:'192.0.2.2'},{SessionName_str:'S1',IpAddress_ip:'192.0.2.1'},{SessionName_str:'stale',IpAddress_ip:'192.0.2.3'}]};}},{write:()=>{}});const r=await u.list('HUB');assert.deepEqual(r.users[0].vpnIps,['192.0.2.1','192.0.2.2']);assert.deepEqual(r.users[1].vpnIps,[]);
+});
