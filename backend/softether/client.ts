@@ -1,7 +1,7 @@
 import https from 'node:https';
 import { randomUUID } from 'node:crypto';
 
-export const METHODS = ['GetServerInfo','GetServerStatus','EnumHub','EnumListener','EnumSession','GetHubStatus','GetIPsecServices','GetOpenVpnSstpConfig','EnumUser','GetUser','CreateUser','SetUser','DeleteUser'] as const;
+export const METHODS = ['GetServerInfo','GetServerStatus','EnumHub','EnumListener','EnumSession','EnumIPTable','EnumDHCP','GetHubStatus','GetIPsecServices','GetOpenVpnSstpConfig','EnumUser','GetUser','CreateUser','SetUser','DeleteUser'] as const;
 export type Method = typeof METHODS[number];
 export type RecordValue = Record<string, unknown>;
 export interface Reader { call(method: Method, params?: RecordValue): Promise<RecordValue> }
@@ -22,7 +22,7 @@ export class SoftEtherClient implements Reader {
     if (!(METHODS as readonly string[]).includes(method)) throw new RpcError('unsupported');
     const validName=(v:unknown)=>typeof v==='string' && v.length>0 && v.length<=255 && !/[\x00-\x1f\x7f]/.test(v);
     const keys=Object.keys(params);
-    if (['EnumSession','GetHubStatus','EnumUser'].includes(method)) {
+    if (['EnumSession','EnumIPTable','EnumDHCP','GetHubStatus','EnumUser'].includes(method)) {
       if(keys.length!==1 || !validName(params.HubName_str))throw new RpcError('unsupported');
     } else if (['GetUser','DeleteUser'].includes(method)) {
       if(keys.length!==2 || !validName(params.HubName_str)||!validName(params.Name_str)||params.Name_str==='*')throw new RpcError('unsupported');

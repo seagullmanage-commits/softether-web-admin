@@ -69,3 +69,10 @@ The console holds administrator-level SoftEther credentials on the server. Prote
 Dashboard collection is bounded and reports unavailable data explicitly. User-change audit records are rotated locally; this is not a full SoftEther log viewer or a tamper-proof external audit system. A successful download or network handshake does not establish that client authentication, DNS, or tunnel routing works; validate those from a client device.
 
 No production configuration, deployment history, real account data, certificates, private keys, or screenshots are included in this repository. A public repository does not itself grant an open-source license; no license has been selected yet.
+
+
+## Address visibility — 0.3.1
+
+Active sessions now show VPN IP addresses learned by the hub, separately from the client source IP. IPs are matched by hub and session name; a session may have multiple addresses. “Not learned” means the hub has no current IP-table entry, while “Unavailable” means retrieval failed.
+
+The IP assignments section shows SecureNAT DHCP leases with assigned address, device name and expiry. Leases can outlive sessions and do not identify a user by themselves. Learned session IPs can also come from static configuration or another DHCP server; they are not all SecureNAT assignments. Results remain bounded to 200 entries per table and 20 hubs, with warnings when data is unavailable or truncated.
