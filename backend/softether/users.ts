@@ -62,6 +62,23 @@ export class Users {
    await this.rpc.call('SetUser',params);
   });
  }
+ private preserved(current:R):R{
+  if(current.AuthType_u32!==1)throw new UserError(409,'Editing currently supports password-authenticated accounts only.');
+  const params:R={AuthType_u32:1};
+  for(const key of ['GroupName_str','Realname_utf','Note_utf','ExpireTime_dt']){if(typeof current[key]!=='string')throw Error();params[key]=current[key];}
+  params.UsePolicy_bool=current.UsePolicy_bool===true;
+  if(params.UsePolicy_bool){const fields=Object.entries(current).filter(([k])=>/^policy:[A-Za-z0-9]+_(bool|u32)$/.test(k));if(!fields.length)throw Error();for(const [k,v] of fields){if(k.endsWith('_bool')?typeof v!=='boolean':typeof v!=='number'||!Number.isInteger(v)||v<0)throw Error();params[k]=v;}}
+  return params;
+ }
+ async edit(input:{hub:string;name:string;realName:string},actor:string){
+  if(input.realName.length>255)throw new UserError(400,'Full name is too long.');
+  return this.mutate('USER_EDIT',input.hub,input.name,actor,async()=>{
+   const current=await this.rpc.call('GetUser',{HubName_str:input.hub,Name_str:input.name});
+   const preserved=this.preserved(current);
+   if(typeof current.HashedKey_bin!=='string'||!/^[A-Za-z0-9+/]{27}=$/.test(current.HashedKey_bin)||typeof current.NtLmSecureHash_bin!=='string'||!/^[A-Za-z0-9+/]{22}==$/.test(current.NtLmSecureHash_bin))throw new UserError(409,'Cannot safely preserve this account password. No change was made.');
+   await this.rpc.call('SetUser',{...preserved,HubName_str:input.hub,Name_str:input.name,Realname_utf:input.realName,HashedKey_bin:current.HashedKey_bin,NtLmSecureHash_bin:current.NtLmSecureHash_bin});
+  });
+ }
  async remove(input:{hub:string;name:string;confirmName:string},actor:string){
   if(input.confirmName!==input.name)throw new UserError(400,'Type the exact username to confirm.');
   return this.mutate('USER_DELETE',input.hub,input.name,actor,async()=>{await this.rpc.call('DeleteUser',{HubName_str:input.hub,Name_str:input.name});});

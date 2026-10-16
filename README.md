@@ -86,3 +86,8 @@ The Users table includes Online/Offline status based on active sessions in the s
 ## Online user IP popup — 0.3.4
 
 Click an Online badge to fetch the selected user's current VPN addresses. The dialog lists unique learned addresses joined to that user's active sessions in the selected hub. Multiple devices are combined; stale IP-table entries without a matching active session are excluded. Offline, unavailable and not-yet-learned results are shown explicitly. The dialog supports keyboard activation, Escape and a Close button.
+
+
+## Full-name editor — 0.4.0
+
+The Users table no longer displays the Access column. Edit opens a full-name-only dialog for password-authenticated users; the username is displayed as context and cannot be changed. The server rejects extra username-change fields. Full-name edits preserve password hashes, group, description, expiry and policy; authentication material stays server-side and out of the audit log. Accounts with unsupported authentication are not editable here.

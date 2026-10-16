@@ -27,8 +27,8 @@ export class SoftEtherClient implements Reader {
     } else if (['GetUser','DeleteUser'].includes(method)) {
       if(keys.length!==2 || !validName(params.HubName_str)||!validName(params.Name_str)||params.Name_str==='*')throw new RpcError('unsupported');
     } else if (method==='CreateUser'||method==='SetUser') {
-      const fields=['HubName_str','Name_str','GroupName_str','Realname_utf','Note_utf','ExpireTime_dt','AuthType_u32','Auth_Password_str','UsePolicy_bool'];
-      if(!validName(params.HubName_str)||!validName(params.Name_str)||params.Name_str==='*'||params.AuthType_u32!==1||typeof params.Auth_Password_str!=='string'||params.Auth_Password_str.length<10||params.Auth_Password_str.length>255||keys.some(k=>!fields.includes(k)&&!/^policy:[A-Za-z0-9]+_(bool|u32)$/.test(k)))throw new RpcError('unsupported');
+      const fields=['HubName_str','Name_str','GroupName_str','Realname_utf','Note_utf','ExpireTime_dt','AuthType_u32','Auth_Password_str','UsePolicy_bool','HashedKey_bin','NtLmSecureHash_bin'];
+      if(!validName(params.HubName_str)||!validName(params.Name_str)||params.Name_str==='*'||params.AuthType_u32!==1||!((typeof params.Auth_Password_str==='string'&&params.Auth_Password_str.length>=10&&params.Auth_Password_str.length<=255&&!('HashedKey_bin' in params)&&!('NtLmSecureHash_bin' in params))||(method==='SetUser'&&!('Auth_Password_str' in params)&&typeof params.HashedKey_bin==='string'&&/^[A-Za-z0-9+/]{27}=$/.test(params.HashedKey_bin)&&typeof params.NtLmSecureHash_bin==='string'&&/^[A-Za-z0-9+/]{22}==$/.test(params.NtLmSecureHash_bin)))||keys.some(k=>!fields.includes(k)&&!/^policy:[A-Za-z0-9]+_(bool|u32)$/.test(k)))throw new RpcError('unsupported');
     } else if(keys.length!==0)throw new RpcError('unsupported');
     const id = randomUUID();
     const payload = JSON.stringify({jsonrpc: '2.0', id, method, params});
