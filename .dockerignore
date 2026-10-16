@@ -1,0 +1,15 @@
+node_modules
+dist
+.git
+.env
+.env.*
+secrets
+audit
+backups
+*.key
+*.pem
+*.crt
+*.ovpn
+*.log
+*.jsonl
+tests

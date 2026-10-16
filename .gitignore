@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+secrets/
+audit/
+backups/
+*.pem
+*.key
+*.crt
+*.ovpn
+*.log
+*.jsonl
+*.zip
+*.tar*
+.DS_Store

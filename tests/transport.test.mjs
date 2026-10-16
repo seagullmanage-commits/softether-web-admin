@@ -1,0 +1,22 @@
+import {test,before,after} from 'node:test';
+import assert from 'node:assert/strict';
+import https from 'node:https';
+import {mkdtempSync,readFileSync,writeFileSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {execFileSync} from 'node:child_process';
+import {SoftEtherClient} from '../dist/backend/softether/client.js';
+const directory=mkdtempSync(join(tmpdir(),'vpn-admin-tls-test-'));
+let server,port,cert,key,mode='valid',seen=[];
+before(async()=>{
+ writeFileSync(join(directory,'cert.cnf'),'[req]\ndistinguished_name=dn\nx509_extensions=ext\nprompt=no\n[dn]\nCN=rpc.test\n[ext]\nsubjectAltName=DNS:rpc.test\nbasicConstraints=critical,CA:TRUE\n');
+ execFileSync('openssl',['req','-x509','-newkey','rsa:2048','-nodes','-days','1','-config',join(directory,'cert.cnf'),'-keyout',join(directory,'key.pem'),'-out',join(directory,'cert.pem')],{stdio:'ignore'});
+ cert=readFileSync(join(directory,'cert.pem'),'utf8');key=readFileSync(join(directory,'key.pem'));
+ server=https.createServer({key,cert},(req,res)=>{let body='';req.on('data',chunk=>body+=chunk);req.on('end',()=>{seen.push(req.headers);if(mode==='timeout')return;if(mode==='auth'){res.writeHead(401);res.end();return;}if(mode==='oversize'){res.end('x'.repeat(2_100_000));return;}if(mode==='malformed'){res.end('not json');return;}const request=JSON.parse(body);res.setHeader('Content-Type','application/json');res.end(JSON.stringify({jsonrpc:'2.0',id:mode==='wrong-id'?'wrong':request.id,...(mode==='rpc-error'?{error:{code:123,message:'secret details'}}:{result:{ServerVersionString_str:'test'}})}));});});
+ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));port=server.address().port;
+});
+after(async()=>{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));rmSync(directory,{recursive:true,force:true});});
+const client=(options={})=>new SoftEtherClient({host:'127.0.0.1',port,servername:'rpc.test',ca:cert,password:'fixture-secret',timeoutMs:150,...options});
+test('verified TLS sends expected server-only authentication headers',async()=>{mode='valid';const c=client();try{assert.equal((await c.call('GetServerInfo')).ServerVersionString_str,'test');assert.equal(seen.at(-1)['x-vpnadmin-password'],'fixture-secret');assert.equal(seen.at(-1)['x-vpnadmin-hubname'],'');}finally{c.close();}});
+test('untrusted certificates and wrong server names fail closed',async()=>{for(const options of [{ca:''},{servername:'wrong.test'}]){const c=client(options);try{await assert.rejects(c.call('GetServerInfo'),error=>error.kind==='tls');}finally{c.close();}}});
+test('timeouts, oversized bodies, bad JSON, mismatched IDs and RPC errors are sanitized',async()=>{for(const [scenario,kind] of [['timeout','timeout'],['oversize','invalid_response'],['malformed','invalid_response'],['wrong-id','invalid_response'],['auth','authentication'],['rpc-error','unsupported']]){mode=scenario;const c=client();try{await assert.rejects(c.call('GetServerInfo'),error=>error.kind===kind&&!error.message.includes('secret'));}finally{c.close();}}});

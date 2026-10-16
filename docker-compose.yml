@@ -1,0 +1,49 @@
+name: softether-web-admin
+services:
+  vpn-admin:
+    image: softether-web-admin:0.3.0
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        NODE_IMAGE: ${NODE_IMAGE:?Set a verified Node 24 image digest in .env}
+    restart: unless-stopped
+    init: true
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs: ["/tmp:size=16m,mode=1777"]
+    mem_limit: 256m
+    cpus: 0.5
+    pids_limit: 64
+    ports: ["127.0.0.1:3080:3000"]
+    environment:
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:?Set the public HTTPS origin}
+      ADMIN_USERNAME: admin
+      AUDIT_FILE: /var/lib/vpn-admin/audit.jsonl
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES:?Set the exact trusted proxy address or CIDR}
+      VPN_PUBLIC_HOST: ${VPN_PUBLIC_HOST:?Set the public VPN hostname}
+      SOFTETHER_HOST: ${SOFTETHER_HOST:?Set the private SoftEther hostname}
+      SOFTETHER_PORT: ${SOFTETHER_PORT:-443}
+      SOFTETHER_TLS_NAME: ${SOFTETHER_TLS_NAME:?Set the certificate server name}
+      SOFTETHER_PASSWORD_FILE: /run/secrets/softether_password
+      SOFTETHER_CA_FILE: /run/secrets/softether_ca
+      ADMIN_HASH_FILE: /run/secrets/admin_hash
+    volumes:
+      - ./audit:/var/lib/vpn-admin
+    secrets: [softether_password, softether_ca, admin_hash]
+    networks: [vpn_backend]
+    logging:
+      driver: json-file
+      options: {max-size: 5m, max-file: '3'}
+secrets:
+  softether_password:
+    file: ./secrets/softether_password
+  softether_ca:
+    file: ./secrets/softether-ca.pem
+  admin_hash:
+    file: ./secrets/admin_hash.json
+networks:
+  vpn_backend:
+    external: true
+    name: ${VPN_BACKEND_NETWORK:?Set the existing Docker network name}
