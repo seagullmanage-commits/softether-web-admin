@@ -21,3 +21,12 @@ test('user endpoints enforce authentication, CSRF, exact confirmation and schema
  assert.equal((await app.inject({method:'POST',url:'/api/users/delete',headers,payload})).statusCode,200);
  assert.equal(f.calls.filter(c=>c.method==='DeleteUser').length,1);
  }finally{await app.close();}});
+
+
+test('online status uses sessions from the selected hub and matches case-insensitively',async()=>{
+ const calls=[];const u=new Users({call:async(m,p)=>{calls.push([m,p]);if(m==='EnumHub')return{HubList:[{HubName_str:'HUB'}]};if(m==='EnumUser')return{UserList:[{Name_str:'Alice'},{Name_str:'Bob'}]};if(m==='EnumSession')return{SessionList:[{Username_str:'alice'},{Username_str:'ALICE'}]};throw Error();}},{write:()=>{}});
+ const result=await u.list('HUB');assert.equal(result.statusAvailable,true);assert.deepEqual(result.users.map(x=>x.online),[true,false]);assert.equal(calls.find(x=>x[0]==='EnumSession')[1].HubName_str,'HUB');
+});
+test('missing or failed session data shows unavailable, never offline',async()=>{
+ for(const response of [null,{}, {SessionList:[{}]}]){const u=new Users({call:async m=>{if(m==='EnumHub')return{HubList:[{HubName_str:'HUB'}]};if(m==='EnumUser')return{UserList:[{Name_str:'Alice'}]};if(response===null)throw Error('private detail');return response;}},{write:()=>{}});const result=await u.list('HUB');assert.equal(result.statusAvailable,false);assert.equal(result.users[0].online,null);}
+});

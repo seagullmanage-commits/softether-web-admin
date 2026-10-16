@@ -76,3 +76,8 @@ No production configuration, deployment history, real account data, certificates
 Active sessions now show VPN IP addresses learned by the hub, separately from the client source IP. IPs are matched by hub and session name; a session may have multiple addresses. “Not learned” means the hub has no current IP-table entry, while “Unavailable” means retrieval failed.
 
 The IP assignments section shows SecureNAT DHCP leases with assigned address, device name and expiry. Leases can outlive sessions and do not identify a user by themselves. Learned session IPs can also come from static configuration or another DHCP server; they are not all SecureNAT assignments. Results remain bounded to 200 entries per table and 20 hubs, with warnings when data is unavailable or truncated.
+
+
+## User connection status — 0.3.2
+
+The Users table includes Online/Offline status based on active sessions in the selected hub, matched by username without case sensitivity. Multiple sessions still show a single Online status. Failed or malformed session enumeration shows Unavailable, never Offline. The selected user list refreshes with the dashboard every 30 seconds while visible, and when Refresh is clicked.

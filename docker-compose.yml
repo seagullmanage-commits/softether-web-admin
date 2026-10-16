@@ -1,7 +1,7 @@
 name: softether-web-admin
 services:
   vpn-admin:
-    image: softether-web-admin:0.3.1
+    image: softether-web-admin:0.3.2
     build:
       context: .
       dockerfile: docker/Dockerfile

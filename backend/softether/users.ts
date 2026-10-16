@@ -9,7 +9,12 @@ export class Users {
  private async hub(name:string){const result=await this.rpc.call('EnumHub');if(!Array.isArray(result.HubList)||!result.HubList.some(h=>object(h).HubName_str===name))throw new UserError(404,'Virtual hub not found. Refresh the hub list.');}
  async list(hub:string){
   try{await this.hub(hub);const r=await this.rpc.call('EnumUser',{HubName_str:hub});if(!Array.isArray(r.UserList)||r.UserList.length>10000)throw Error();
-   return {users:r.UserList.map(v=>{const u=object(v);return {name:string(u,'Name_str'),realName:string(u,'Realname_utf'),group:string(u,'GroupName_str'),note:string(u,'Note_utf'),authType:typeof u.AuthType_u32==='number'?u.AuthType_u32:null,denied:typeof u.DenyAccess_bool==='boolean'?u.DenyAccess_bool:null,lastLogin:string(u,'LastLoginTime_dt')||null,logins:typeof u.NumLogin_u32==='number'?u.NumLogin_u32:null};})};
+   let connected:Set<string>|null=null;
+   try{const sessions=await this.rpc.call('EnumSession',{HubName_str:hub});
+    if(!Array.isArray(sessions.SessionList)||sessions.SessionList.length>10000)throw Error();
+    connected=new Set(sessions.SessionList.map(v=>{const row=object(v);if(typeof row.Username_str!=='string')throw Error();return row.Username_str.toLowerCase();}));
+   }catch{connected=null;}
+   return {statusAvailable:connected!==null,users:r.UserList.map(v=>{const u=object(v);return {name:string(u,'Name_str'),online:connected===null?null:connected.has(string(u,'Name_str').toLowerCase()),realName:string(u,'Realname_utf'),group:string(u,'GroupName_str'),note:string(u,'Note_utf'),authType:typeof u.AuthType_u32==='number'?u.AuthType_u32:null,denied:typeof u.DenyAccess_bool==='boolean'?u.DenyAccess_bool:null,lastLogin:string(u,'LastLoginTime_dt')||null,logins:typeof u.NumLogin_u32==='number'?u.NumLogin_u32:null};})};
   }catch(e){if(e instanceof UserError)throw e;throw new UserError(502,'Could not load users. Retry after checking server connectivity.');}
  }
  private async mutate(action:string,hub:string,name:string,actor:string,run:()=>Promise<void>){
