@@ -91,3 +91,8 @@ Click an Online badge to fetch the selected user's current VPN addresses. The di
 ## Full-name editor — 0.4.0
 
 The Users table no longer displays the Access column. Edit opens a full-name-only dialog for password-authenticated users; the username is displayed as context and cannot be changed. The server rejects extra username-change fields. Full-name edits preserve password hashes, group, description, expiry and policy; authentication material stays server-side and out of the audit log. Accounts with unsupported authentication are not editable here.
+
+
+## VNC links — 0.4.1
+
+VPN addresses in Active sessions and the Online popup link to `vnc://` to launch a registered VNC application (such as macOS Screen Sharing). IPv6 addresses use brackets. The device opening the link must have VPN routing to the target, which must have VNC or Screen Sharing enabled. The browser may prompt to open the application. No remote credentials are embedded and the dashboard does not proxy VNC traffic.

@@ -7,3 +7,5 @@ select{font:inherit;color:inherit;background:#101820;border:1px solid #40505d;bo
 .user-status{display:inline-block;min-width:68px;text-align:center;white-space:nowrap;padding:4px 9px;border:1px solid #41515f;border-radius:999px;font-size:12px;font-weight:500;line-height:1.4;color:#b8c7d2;background:#26323e}.user-status.is-online{color:#a4cbb5;background:#243b32;border-color:#3d6050}.user-status.is-offline{color:#d4aaaa;background:#3c2b30;border-color:#65474e}
 
 button.user-status.is-online:hover{background:#304d40;border-color:#658e77;color:#bddbc9}#ip-dialog{width:min(460px,calc(100vw - 36px));overflow-wrap:anywhere}#ip-list{padding-left:22px;line-height:1.9;font-variant-numeric:tabular-nums}
+
+.vpn-link{color:#9bc8bb;text-decoration:underline;text-decoration-color:#567f73;text-underline-offset:3px}.vpn-link:hover{color:#c0dfd4;text-decoration-color:currentColor}.vpn-link:focus-visible{outline:2px solid #9bc8bb;border-radius:2px}
