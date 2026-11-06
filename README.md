@@ -98,6 +98,6 @@ The Users table no longer displays the Access column. Edit opens a full-name-onl
 VPN addresses in Active sessions and the Online popup link to `vnc://` to launch a registered VNC application (such as macOS Screen Sharing). IPv6 addresses use brackets. The device opening the link must have VPN routing to the target, which must have VNC or Screen Sharing enabled. The browser may prompt to open the application. No remote credentials are embedded and the dashboard does not proxy VNC traffic.
 
 
-## Active session sorting — 0.4.2
+## Active session sorting — 0.4.3
 
-Click any Active sessions column heading to sort descending only. Repeated clicks keep descending order; the selection persists through dashboard refreshes. User and hub names use natural ordering, IP addresses use numeric address ordering, Connected uses timestamps, and Traffic uses raw byte counts. Missing values stay last. Multiple VPN IPs sort by their numerically ordered address list. Headings support keyboard activation and announce the active sort direction.
+Click any Active sessions column heading to sort ascending only. Repeated clicks keep ascending order; the selection persists through dashboard refreshes. User and hub names use natural ordering, IP addresses use numeric address ordering, Connected uses timestamps, and Traffic uses raw byte counts. Missing values stay last. Multiple VPN IPs sort by their numerically ordered address list. Headings support keyboard activation and announce the active sort direction.

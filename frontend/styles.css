@@ -10,4 +10,4 @@ button.user-status.is-online:hover{background:#304d40;border-color:#658e77;color
 
 .vpn-link{color:#9bc8bb;text-decoration:underline;text-decoration-color:#567f73;text-underline-offset:3px}.vpn-link:hover{color:#c0dfd4;text-decoration-color:currentColor}.vpn-link:focus-visible{outline:2px solid #9bc8bb;border-radius:2px}
 
-.sort-heading{font:inherit;text-transform:inherit;letter-spacing:inherit;color:inherit;background:transparent;border:0;border-radius:4px;padding:6px 0;white-space:nowrap;text-align:left}.sort-heading:hover{color:#c0dfd4;background:transparent}.sort-heading:focus-visible{outline:2px solid #9bc8bb;outline-offset:4px}th[aria-sort="descending"]{color:#b2d8cb}.sort-arrow{margin-left:4px}
+.sort-heading{font:inherit;text-transform:inherit;letter-spacing:inherit;color:inherit;background:transparent;border:0;border-radius:4px;padding:6px 0;white-space:nowrap;text-align:left}.sort-heading:hover{color:#c0dfd4;background:transparent}.sort-heading:focus-visible{outline:2px solid #9bc8bb;outline-offset:4px}th[aria-sort="ascending"]{color:#b2d8cb}.sort-arrow{margin-left:4px}
